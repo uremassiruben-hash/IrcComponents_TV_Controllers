@@ -1,0 +1,12 @@
+services:
+  thermolink-compile:
+    build: .
+    container_name: thermolink-compile
+    ports:
+      - "5000:5000"
+    environment:
+      ARDUINO_FQBN: "esp32:esp32:esp32"
+      # Lascia vuoto in locale. Su server online metti una password lunga.
+      THERMOLINK_COMPILE_TOKEN: ""
+      COMPILE_TIMEOUT_SEC: "220"
+    restart: unless-stopped
