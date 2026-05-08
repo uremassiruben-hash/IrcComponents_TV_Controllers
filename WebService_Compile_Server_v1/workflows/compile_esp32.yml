@@ -1,0 +1,50 @@
+name: Compile ESP32 firmware
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - 'TestPinWifi__NTC_Bella8_OTA_EDITOR_READY_v2_fix_json/**'
+      - '.github/workflows/compile_esp32.yml'
+
+jobs:
+  compile:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Arduino CLI
+        uses: arduino/setup-arduino-cli@v2
+
+      - name: Configure Arduino CLI
+        run: |
+          arduino-cli config init
+          arduino-cli core update-index
+          arduino-cli core install esp32:esp32
+          arduino-cli lib update-index
+          arduino-cli lib install "WiFiManager"
+          arduino-cli lib install "PID"
+
+      - name: Compile firmware
+        run: |
+          mkdir -p build
+          arduino-cli compile \
+            --fqbn esp32:esp32:esp32 \
+            --export-binaries \
+            --output-dir build \
+            TestPinWifi__NTC_Bella8_OTA_EDITOR_READY_v2_fix_json
+
+      - name: Show build files
+        run: ls -lah build
+
+      - name: Upload firmware artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: esp32-firmware-bin
+          path: |
+            build/*.bin
+            build/*.elf
+            build/*.map
+          if-no-files-found: error
